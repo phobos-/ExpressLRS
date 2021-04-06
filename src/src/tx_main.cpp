@@ -180,6 +180,9 @@ void ICACHE_RAM_ATTR ProcessTLMpacket()
             crsf.LinkStatistics.downlink_Link_quality = LPD_DownlinkLQ.update(LQCALC.getLQ()) + 1; // +1 fixes rounding issues with filter and makes it consistent with RX LQ Calculation
             //crsf.LinkStatistics.downlink_Link_quality = Radio.currPWR;
             crsf.LinkStatistics.rf_Mode = 4 - ExpressLRS_currAirRate_Modparams->index;
+        #ifndef ENABLE_TELEMETRY
+            crsf.TLMbattSensor.voltage = (Radio.RXdataBuffer[3] << 8) + Radio.RXdataBuffer[6];
+        #endif
             break;
 
         #ifdef ENABLE_TELEMETRY
@@ -747,6 +750,9 @@ void loop()
   if ((connectionState == connected) && (LastTLMpacketRecvMillis != 0) &&
       (now >= (uint32_t)(TLM_REPORT_INTERVAL_MS + TLMpacketReported))) {
     crsf.sendLinkStatisticsToTX();
+  #ifndef ENABLE_TELEMETRY
+    crsf.sendVoltageToTX();
+  #endif
     TLMpacketReported = now;
   }
 }

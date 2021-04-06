@@ -315,10 +315,18 @@ void ICACHE_RAM_ATTR HandleSendTelemetryResponse()
             // convert to 8 bit signed value in the negative range (-128 to 0)
             openTxRSSI = 255 - openTxRSSI;
             Radio.TXdataBuffer[2] = openTxRSSI;
+            #ifdef ENABLE_TELEMETRY
             Radio.TXdataBuffer[3] = 0;
+            #else
+            Radio.TXdataBuffer[3] = (crsf.TLMbattSensor.voltage & 0xFF00) >> 8;
+            #endif
             Radio.TXdataBuffer[4] = crsf.LinkStatistics.uplink_SNR;
             Radio.TXdataBuffer[5] = crsf.LinkStatistics.uplink_Link_quality;
+            #ifdef ENABLE_TELEMETRY
             Radio.TXdataBuffer[6] = 0;
+            #else
+            Radio.TXdataBuffer[6] = (crsf.TLMbattSensor.voltage & 0x00FF);
+            #endif
 
             break;
         #ifdef ENABLE_TELEMETRY

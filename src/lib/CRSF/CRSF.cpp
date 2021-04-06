@@ -282,6 +282,24 @@ void CRSF::sendLUAresponse(uint8_t val[], uint8_t len)
 #endif
 }
 
+void ICACHE_RAM_ATTR CRSF::sendVoltageToTX()
+{
+    uint8_t outBuffer[BattSensorFrameLength + 4] = {0};
+
+    outBuffer[0] = CRSF_ADDRESS_RADIO_TRANSMITTER;
+    outBuffer[1] = BattSensorFrameLength + 2;
+    outBuffer[2] = CRSF_FRAMETYPE_BATTERY_SENSOR;
+
+    outBuffer[3] = CRSF::TLMbattSensor.voltage << 8;
+    outBuffer[4] = CRSF::TLMbattSensor.voltage;
+
+    uint8_t crc = crsf_crc.calc(&outBuffer[2], BattSensorFrameLength + 1);
+
+    outBuffer[BattSensorFrameLength + 3] = crc;
+
+    sendTelemetryToTX(outBuffer);
+}
+
 void ICACHE_RAM_ATTR CRSF::sendTelemetryToTX(uint8_t *data)
 {
     if (data[CRSF_TELEMETRY_LENGTH_INDEX] > CRSF_PAYLOAD_SIZE_MAX)
